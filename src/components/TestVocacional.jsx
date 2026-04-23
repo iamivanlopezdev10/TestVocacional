@@ -230,12 +230,7 @@ export default function TestVocacional() {
       <div style={styles.badge}>
         {resultadoArea.toUpperCase()}
       </div>
-
-      {/* BOTÓN PDF IMPLEMENTADO */}
-      <button style={styles.btnPDF} onClick={descargarPDF}>
-        DESCARGAR MI RESULTADO (PDF) 📄
-      </button>
-
+      
       <div style={{textAlign: 'left', backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '15px', margin: '20px 0'}}>
         <p style={{fontSize: '14px', margin: '5px 0'}}>✅ <b>RVOES Federales</b></p>
         <p style={{fontSize: '14px', margin: '5px 0'}}>✅ <b>Titulación Garantizada</b></p>
