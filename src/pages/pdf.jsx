@@ -5,28 +5,42 @@ const generarPDF = () => {
     format: "a4"
   });
 
-  const nombreUsuario = aspirante.nombre || "Aspirante";
+  const nombreUsuario = (aspirante.nombre || "Aspirante").toUpperCase();
   const carreraGanadora = Object.keys(puntos).reduce((a, b) => puntos[a] > puntos[b] ? a : b);
 
-  // 1. URL de la imagen que me pasaste (la subí a un hosting para que funcione directo)
+  // 1. La plantilla (Fondo)
   const plantillaImg = "https://res.cloudinary.com/du9yqkkdg/image/upload/v1776986818/TEST_VOCACIONAL_Millka_Valeria_Bravo_Ju%C3%A1rez_page-0001_bgji7p.jpg";
 
-  // 2. Dibujar la imagen de fondo (ocupa toda la hoja A4: 210x297mm)
-  doc.addImage(plantillaImg, 'JPEG', 0, 0, 210, 297);
+  // Usamos un bloque try/catch por si la imagen tarda en cargar
+  try {
+    // Dibujar fondo
+    doc.addImage(plantillaImg, 'JPEG', 0, 0, 210, 297);
 
-  // 3. Configurar el estilo de texto para el NOMBRE
-  // Nota: En tu imagen el "¡Hola!" ya está, así que ponemos el nombre a un lado.
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.setTextColor(0, 0, 0); // Negro puro
-  doc.text(`${nombreUsuario}.`, 35, 38.5); // X=35mm (después del Hola), Y=38.5mm (alineado al texto)
+    // 2. NOMBRE (Después del ¡Hola!)
+    // Le bajé un pelín el tamaño para que no se vea tosco
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16); 
+    doc.setTextColor(30, 30, 30); // Un gris casi negro se ve más real que el negro puro
+    doc.text(`${nombreUsuario}.`, 35, 38.2); 
 
-  // 4. Configurar el estilo para la CARRERA
-  // La ponemos justo debajo del birrete
-  doc.setFontSize(24);
-  doc.setTextColor(0, 0, 0); 
-  doc.text(carreraGanadora.toUpperCase(), 105, 116, { align: "center" });
+    // 3. CARRERA (Debajo del birrete)
+    // Usamos un color un poco más "institucional" o negro sólido
+    doc.setFontSize(22);
+    doc.setTextColor(20, 20, 20);
+    // Bajé la coordenada Y a 118 para que respire mejor con el birrete
+    doc.text(carreraGanadora.toUpperCase(), 105, 118, { align: "center" });
 
-  // 5. Descargar
-  doc.save(`Test_Vocacional_${nombreUsuario.replace(/\s+/g, '_')}.pdf`);
+    // 4. EXTRA: Fecha opcional en una esquina (para que se vea oficial)
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Válido al: ${new Date().toLocaleDateString()}`, 170, 285);
+
+    // Descarga
+    doc.save(`Resultado_TecTux_${nombreUsuario.split(' ')[0]}.pdf`);
+
+  } catch (error) {
+    console.error("Error al generar el PDF:", error);
+    alert("Hubo un detalle al generar tu PDF, pero no te preocupes, tus resultados están guardados.");
+  }
 };
