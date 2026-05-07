@@ -2,15 +2,25 @@ import React, { useState } from 'react';
 import { jsPDF } from "jspdf";
 
 export default function TestVocacional() {
+
+  // =========================
   // 1. ESTADOS
+  // =========================
   const [aspirante, setAspirante] = useState({
-    nombre: '', whatsapp: '', grado: '', grupo: '', escuela: ''
+    nombre: '',
+    whatsapp: '',
+    grado: '',
+    grupo: '',
+    escuela: ''
   });
-  const [step, setStep] = useState(0); 
+
+  const [step, setStep] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [puntos, setPuntos] = useState({});
 
-  // 2. CONFIGURACIÓN DE CARRERAS Y COLORES
+  // =========================
+  // 2. CONFIGURACIÓN
+  // =========================
   const configuracionCarreras = {
     "Criminología": { color: "#E63946", bg: "#fdeaea" },
     "Enfermería": { color: "#00B4D8", bg: "#e0f7fa" },
@@ -23,7 +33,9 @@ export default function TestVocacional() {
     "Administración de Empresas": { color: "#FFB703", bg: "#fff8e6" }
   };
 
-  // 3. LAS 54 PREGUNTAS
+  // =========================
+  // 3. PREGUNTAS
+  // =========================
   const preguntas = [
     { q: "1.- Me gustaría dirigir un grupo de personas hacia un objetivo común.", area: "Administración de Empresas" },
     { q: "2.- Disfruto dibujar o imaginar estructuras y espacios nuevos.", area: "Arquitectura" },
@@ -81,164 +93,508 @@ export default function TestVocacional() {
     { q: "54.- Me motiva ayudar a otros a recuperar su salud y bienestar.", area: "Enfermería" }
   ];
 
-  const valores = { "Me gusta mucho": 3, "Me gusta": 2, "No me gusta": 1, "No me gusta nada": 0 };
+  const valores = {
+    "Me gusta mucho": 3,
+    "Me gusta": 2,
+    "No me gusta": 1,
+    "No me gusta nada": 0
+  };
 
-  // 4. FUNCION GENERAR PDF (IMPLEMENTADA)
+  // =========================
+  // 4. PDF
+  // =========================
   const descargarPDF = () => {
+
     const doc = new jsPDF();
-    const resultadoFinal = Object.keys(puntos).reduce((a, b) => puntos[a] > puntos[b] ? a : b);
+
+    const resultadoFinal = Object.keys(puntos).reduce((a, b) =>
+      puntos[a] > puntos[b] ? a : b
+    );
+
     const fecha = new Date().toLocaleDateString();
 
-    // Fondo Encabezado (Azul TecTux)
     doc.setFillColor(29, 53, 87);
     doc.rect(0, 0, 210, 40, 'F');
 
-    // Texto Encabezado
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
-    doc.text("TECNOLÓGICO UNIVERSITARIO TUXTLA", 105, 20, { align: "center" });
-    doc.setFontSize(12);
-    doc.text("RESULTADOS DEL TEST VOCACIONAL", 105, 30, { align: "center" });
 
-    // Datos del Alumno
+    doc.text(
+      "TECNOLÓGICO UNIVERSITARIO TUXTLA",
+      105,
+      20,
+      { align: "center" }
+    );
+
+    doc.setFontSize(12);
+
+    doc.text(
+      "RESULTADOS DEL TEST VOCACIONAL",
+      105,
+      30,
+      { align: "center" }
+    );
+
     doc.setTextColor(40, 40, 40);
     doc.setFontSize(14);
+
     doc.text(`Aspirante: ${aspirante.nombre.toUpperCase()}`, 20, 60);
     doc.text(`Escuela: ${aspirante.escuela}`, 20, 70);
     doc.text(`WhatsApp: ${aspirante.whatsapp}`, 20, 80);
 
-    // Resultado Destacado
     doc.setFontSize(18);
-    doc.text("Tu carrera ideal según tu perfil es:", 20, 100);
-    doc.setTextColor(230, 57, 70); // Rojo Institucional
-    doc.setFontSize(26);
-    doc.text(resultadoFinal.toUpperCase(), 105, 120, { align: "center" });
 
-    // Cuadro de Beneficios
+    doc.text(
+      "Tu carrera ideal según tu perfil es:",
+      20,
+      100
+    );
+
+    doc.setTextColor(230, 57, 70);
+
+    doc.setFontSize(26);
+
+    doc.text(
+      resultadoFinal.toUpperCase(),
+      105,
+      120,
+      { align: "center" }
+    );
+
     doc.setDrawColor(200, 200, 200);
     doc.line(20, 140, 190, 140);
+
     doc.setTextColor(29, 53, 87);
     doc.setFontSize(14);
-    doc.text("TUS BENEFICIOS AL INSCRIBIRTE:", 20, 150);
-    
+
+    doc.text(
+      "TUS BENEFICIOS AL INSCRIBIRTE:",
+      20,
+      150
+    );
+
     doc.setTextColor(80, 80, 80);
     doc.setFontSize(12);
+
     doc.text("• COLEGIATURAS CONGELADAS TODA LA CARRERA", 25, 160);
     doc.text("• RVOES FEDERALES (VALIDEZ OFICIAL SEP)", 25, 170);
     doc.text("• TITULACIÓN GARANTIZADA", 25, 180);
     doc.text("• PROGRAMA DE EMPLEABILIDAD", 25, 190);
 
-    // Pie de página
     doc.setFontSize(9);
     doc.setTextColor(150, 150, 150);
-    doc.text(`Fecha de consulta: ${fecha} | Tuxtla Gutiérrez, Chiapas.`, 105, 270, { align: "center" });
 
-    doc.save(`Resultado_Test_${aspirante.nombre.replace(/\s+/g, '_')}.pdf`);
+    doc.text(
+      `Fecha de consulta: ${fecha} | Tuxtla Gutiérrez, Chiapas.`,
+      105,
+      270,
+      { align: "center" }
+    );
+
+    doc.save(
+      `Resultado_Test_${aspirante.nombre.replace(/\s+/g, '_')}.pdf`
+    );
   };
 
-  // 5. LÓGICA DE RESPUESTAS
   const handleAnswer = async (valor) => {
+
     const area = preguntas[currentQuestion].area;
+
     const pts = valores[valor];
-    const nuevosPuntos = { ...puntos, [area]: (puntos[area] || 0) + pts };
+
+    const nuevosPuntos = {
+      ...puntos,
+      [area]: (puntos[area] || 0) + pts
+    };
+
     setPuntos(nuevosPuntos);
 
     if (currentQuestion < preguntas.length - 1) {
+
       setCurrentQuestion(currentQuestion + 1);
+
     } else {
+
       setStep(2);
       await enviarAExcel(nuevosPuntos);
+
     }
   };
 
+  // =========================
+  // 6. ENVIAR A GOOGLE SHEETS
+  // =========================
   const enviarAExcel = async (puntosFinales) => {
-    const resultadoFinal = Object.keys(puntosFinales).reduce((a, b) => puntosFinales[a] > puntosFinales[b] ? a : b);
-    const data = { ...aspirante, resultado: resultadoFinal };
-    
+
+    const resultadoFinal = Object.keys(puntosFinales).reduce((a, b) =>
+      puntosFinales[a] > puntosFinales[b] ? a : b
+    );
+
+    const data = {
+      ...aspirante,
+      resultado: resultadoFinal,
+      puntos: puntosFinales
+    };
+
     try {
-      await fetch('https://script.google.com/macros/s/1II38K03RzLiDRBwPGGOP3ugQTXyRS9ISn9qODAClAnxOx50ji74QlKcS/exec', {
-        method: 'POST',
-        mode: 'no-cors', 
-        body: JSON.stringify(data)
-      });
-    } catch (e) { 
-      console.log("Error al enviar", e); 
+
+      const response = await fetch(
+        'https://script.google.com/macros/s/AKfycbyL7b1sPperVcIuYK0eGYTX_44wHQnFXUn87uQjXvQsToHOw3oBMyuLm6HLTzWt7nIBeA/exec',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        }
+      );
+
+      const result = await response.text();
+
+      console.log("Datos enviados correctamente 🚀");
+      console.log(result);
+
+    } catch (e) {
+
+      console.log("Error al enviar ❌", e);
+
     }
   };
 
-  const resultadoArea = step === 2 ? Object.keys(puntos).reduce((a, b) => puntos[a] > puntos[b] ? a : b) : "";
+  const resultadoArea =
+    step === 2
+      ? Object.keys(puntos).reduce((a, b) =>
+          puntos[a] > puntos[b] ? a : b
+        )
+      : "";
 
-  // 6. ESTILOS
+  // =========================
+  // 7. ESTILOS
+  // =========================
   const styles = {
-    container: { fontFamily: "'Segoe UI', Roboto, sans-serif", maxWidth: '500px', margin: '30px auto', padding: '25px', borderRadius: '30px', boxShadow: '0 15px 35px rgba(0,0,0,0.15)', textAlign: 'center', backgroundColor: '#fff' },
-    title: { color: '#1D3557', fontSize: '22px', fontWeight: '800', marginBottom: '15px' },
-    input: { width: '90%', padding: '12px', margin: '8px 0', borderRadius: '12px', border: '2px solid #eee', fontSize: '15px', outline: 'none' },
-    btnMain: { backgroundColor: '#1D3557', color: 'white', padding: '16px', border: 'none', borderRadius: '15px', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', width: '100%', marginTop: '15px' },
-    btnPDF: { backgroundColor: '#E63946', color: 'white', padding: '16px', border: 'none', borderRadius: '15px', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', width: '100%', marginTop: '10px', boxShadow: '0 4px 10px rgba(230,57,70,0.3)' },
-    btnOption: { backgroundColor: '#f8f9fa', border: '2px solid #eee', padding: '14px', margin: '6px 0', borderRadius: '12px', cursor: 'pointer', width: '100%', fontSize: '16px', fontWeight: '500' },
-    badge: { 
-      backgroundColor: configuracionCarreras[resultadoArea]?.bg || '#f0f0f0', 
-      color: configuracionCarreras[resultadoArea]?.color || '#333',
-      padding: '25px 15px', borderRadius: '20px', fontSize: '26px', fontWeight: '900', margin: '20px 0', border: `3px dashed ${configuracionCarreras[resultadoArea]?.color}`
+
+    container: {
+      fontFamily: "'Segoe UI', Roboto, sans-serif",
+      maxWidth: '500px',
+      margin: '30px auto',
+      padding: '25px',
+      borderRadius: '30px',
+      boxShadow: '0 15px 35px rgba(0,0,0,0.15)',
+      textAlign: 'center',
+      backgroundColor: '#fff'
     },
-    progressContainer: { height: '10px', backgroundColor: '#e9ecef', borderRadius: '10px', marginBottom: '25px', overflow: 'hidden' },
-    progressFill: { height: '100%', backgroundColor: '#1D3557', transition: 'width 0.4s ease-out' }
+
+    title: {
+      color: '#1D3557',
+      fontSize: '22px',
+      fontWeight: '800',
+      marginBottom: '15px'
+    },
+
+    input: {
+      width: '90%',
+      padding: '12px',
+      margin: '8px 0',
+      borderRadius: '12px',
+      border: '2px solid #eee',
+      fontSize: '15px',
+      outline: 'none'
+    },
+
+    btnMain: {
+      backgroundColor: '#1D3557',
+      color: 'white',
+      padding: '16px',
+      border: 'none',
+      borderRadius: '15px',
+      cursor: 'pointer',
+      fontSize: '18px',
+      fontWeight: 'bold',
+      width: '100%',
+      marginTop: '15px'
+    },
+
+    btnOption: {
+      backgroundColor: '#f8f9fa',
+      border: '2px solid #eee',
+      padding: '14px',
+      margin: '6px 0',
+      borderRadius: '12px',
+      cursor: 'pointer',
+      width: '100%',
+      fontSize: '16px',
+      fontWeight: '500'
+    },
+
+    badge: {
+      backgroundColor:
+        configuracionCarreras[resultadoArea]?.bg || '#f0f0f0',
+
+      color:
+        configuracionCarreras[resultadoArea]?.color || '#333',
+
+      padding: '25px 15px',
+      borderRadius: '20px',
+      fontSize: '26px',
+      fontWeight: '900',
+      margin: '20px 0',
+
+      border:
+        `3px dashed ${configuracionCarreras[resultadoArea]?.color}`
+    },
+
+    progressContainer: {
+      height: '10px',
+      backgroundColor: '#e9ecef',
+      borderRadius: '10px',
+      marginBottom: '25px',
+      overflow: 'hidden'
+    },
+
+    progressFill: {
+      height: '100%',
+      backgroundColor: '#1D3557',
+      transition: 'width 0.4s ease-out'
+    }
   };
 
-  // --- VISTA 0: REGISTRO ---
+  // =========================
+  // VISTA 0
+  // =========================
   if (step === 0) return (
+
     <div style={styles.container}>
-      <img src="https://res.cloudinary.com/du9yqkkdg/image/upload/v1768422714/LOGO_TUT_COLOR_SIN_FONDO_1_1_qfyne4.png" alt="Logo TecTux" style={{ width: '220px', marginBottom: '15px' }} />
-      <h1 style={styles.title}>¡DESCUBRE TU FUTURO! 🚀</h1>
-      <p style={{color: '#666', fontSize: '14px'}}>Completa tus datos para iniciar el test del <b>Tecnológico Universitario Tuxtla</b>.</p>
-      <div style={{marginTop: '20px'}}>
-        <input style={styles.input} type="text" placeholder="Nombre completo" onChange={e => setAspirante({...aspirante, nombre: e.target.value})} />
-        <input style={styles.input} type="tel" placeholder="WhatsApp (10 dígitos)" onChange={e => setAspirante({...aspirante, whatsapp: e.target.value})} />
-        <div style={{display: 'flex', gap: '10px', width: '95%', margin: '0 auto'}}>
-          <input style={{...styles.input, width: '50%'}} type="text" placeholder="Grado" onChange={e => setAspirante({...aspirante, grado: e.target.value})} />
-          <input style={{...styles.input, width: '50%'}} type="text" placeholder="Grupo" onChange={e => setAspirante({...aspirante, grupo: e.target.value})} />
+
+      <img
+        src="https://res.cloudinary.com/du9yqkkdg/image/upload/v1768422714/LOGO_TUT_COLOR_SIN_FONDO_1_1_qfyne4.png"
+        alt="Logo TecTux"
+        style={{
+          width: '220px',
+          marginBottom: '15px'
+        }}
+      />
+
+      <h1 style={styles.title}>
+        ¡DESCUBRE TU FUTURO! 🚀
+      </h1>
+
+      <p style={{
+        color: '#666',
+        fontSize: '14px'
+      }}>
+        Completa tus datos para iniciar el test del
+        <b> Tecnológico Universitario Tuxtla</b>.
+      </p>
+
+      <div style={{ marginTop: '20px' }}>
+
+        <input
+          style={styles.input}
+          type="text"
+          placeholder="Nombre completo"
+          onChange={e =>
+            setAspirante({
+              ...aspirante,
+              nombre: e.target.value
+            })
+          }
+        />
+
+        <input
+          style={styles.input}
+          type="tel"
+          placeholder="WhatsApp (10 dígitos)"
+          onChange={e =>
+            setAspirante({
+              ...aspirante,
+              whatsapp: e.target.value
+            })
+          }
+        />
+
+        <div style={{
+          display: 'flex',
+          gap: '10px',
+          width: '95%',
+          margin: '0 auto'
+        }}>
+
+          <input
+            style={{
+              ...styles.input,
+              width: '50%'
+            }}
+            type="text"
+            placeholder="Grado"
+            onChange={e =>
+              setAspirante({
+                ...aspirante,
+                grado: e.target.value
+              })
+            }
+          />
+
+          <input
+            style={{
+              ...styles.input,
+              width: '50%'
+            }}
+            type="text"
+            placeholder="Grupo"
+            onChange={e =>
+              setAspirante({
+                ...aspirante,
+                grupo: e.target.value
+              })
+            }
+          />
+
         </div>
-        <input style={styles.input} type="text" placeholder="Escuela de procedencia" onChange={e => setAspirante({...aspirante, escuela: e.target.value})} />
+
+        <input
+          style={styles.input}
+          type="text"
+          placeholder="Escuela de procedencia"
+          onChange={e =>
+            setAspirante({
+              ...aspirante,
+              escuela: e.target.value
+            })
+          }
+        />
+
       </div>
-      <button style={styles.btnMain} onClick={() => setStep(1)} disabled={!aspirante.nombre || !aspirante.whatsapp}>COMENZAR TEST</button>
+
+      <button
+        style={styles.btnMain}
+        onClick={() => setStep(1)}
+        disabled={!aspirante.nombre || !aspirante.whatsapp}
+      >
+        COMENZAR TEST
+      </button>
+
     </div>
   );
 
-  // --- VISTA 1: PREGUNTAS ---
+  // =========================
+  // VISTA 1
+  // =========================
   if (step === 1) return (
+
     <div style={styles.container}>
+
       <div style={styles.progressContainer}>
-        <div style={{...styles.progressFill, width: `${(currentQuestion / preguntas.length) * 100}%`}}></div>
+        <div
+          style={{
+            ...styles.progressFill,
+            width: `${(currentQuestion / preguntas.length) * 100}%`
+          }}
+        />
       </div>
-      <p style={{fontSize: '13px', color: '#999', fontWeight: 'bold'}}>PREGUNTA {currentQuestion + 1} DE {preguntas.length}</p>
-      <h2 style={{...styles.title, margin: '20px 0', minHeight: '60px', fontSize: '20px'}}>{preguntas[currentQuestion].q}</h2>
-      <div style={{marginTop: '20px'}}>
+
+      <p style={{
+        fontSize: '13px',
+        color: '#999',
+        fontWeight: 'bold'
+      }}>
+        PREGUNTA {currentQuestion + 1} DE {preguntas.length}
+      </p>
+
+      <h2 style={{
+        ...styles.title,
+        margin: '20px 0',
+        minHeight: '60px',
+        fontSize: '20px'
+      }}>
+        {preguntas[currentQuestion].q}
+      </h2>
+
+      <div style={{ marginTop: '20px' }}>
+
         {Object.keys(valores).map(v => (
-          <button key={v} style={styles.btnOption} onClick={() => handleAnswer(v)}>{v}</button>
+
+          <button
+            key={v}
+            style={styles.btnOption}
+            onClick={() => handleAnswer(v)}
+          >
+            {v}
+          </button>
+
         ))}
+
       </div>
+
     </div>
   );
 
-  // --- VISTA 2: RESULTADOS ---
+  // =========================
+  // VISTA 2
+  // =========================
   return (
+
     <div style={styles.container}>
-      <h2 style={{fontSize: '28px', color: '#1D3557'}}>¡EXCELENTE TRABAJO! 🎉</h2>
-      <p style={{fontSize: '16px', margin: '10px 0'}}><b>{aspirante.nombre.toUpperCase()}</b>, tu perfil es ideal para:</p>
-      
+
+      <h2 style={{
+        fontSize: '28px',
+        color: '#1D3557'
+      }}>
+        ¡EXCELENTE TRABAJO! 🎉
+      </h2>
+
+      <p style={{
+        fontSize: '16px',
+        margin: '10px 0'
+      }}>
+        <b>{aspirante.nombre.toUpperCase()}</b>,
+        tu perfil es ideal para:
+      </p>
+
       <div style={styles.badge}>
         {resultadoArea.toUpperCase()}
       </div>
-      
-      <div style={{textAlign: 'left', backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '15px', margin: '20px 0'}}>
-        <p style={{fontSize: '14px', margin: '5px 0'}}>✅ <b>RVOES Federales</b></p>
-        <p style={{fontSize: '14px', margin: '5px 0'}}>✅ <b>Titulación Garantizada</b></p>
-        <p style={{fontSize: '14px', margin: '5px 0'}}>✅ <b>Colegiaturas Congeladas</b></p>
+
+      <div style={{
+        textAlign: 'left',
+        backgroundColor: '#f9f9f9',
+        padding: '15px',
+        borderRadius: '15px',
+        margin: '20px 0'
+      }}>
+
+        <p style={{ fontSize: '14px', margin: '5px 0' }}>
+          ✅ <b>RVOES Federales</b>
+        </p>
+
+        <p style={{ fontSize: '14px', margin: '5px 0' }}>
+          ✅ <b>Titulación Garantizada</b>
+        </p>
+
+        <p style={{ fontSize: '14px', margin: '5px 0' }}>
+          ✅ <b>Colegiaturas Congeladas</b>
+        </p>
+
       </div>
 
-      <button style={{...styles.btnMain, backgroundColor: configuracionCarreras[resultadoArea]?.color}} 
-        onClick={() => window.location.reload()}>FINALIZAR Y SALIR</button>
+      <button
+        style={{
+          ...styles.btnMain,
+          backgroundColor:
+            configuracionCarreras[resultadoArea]?.color
+        }}
+        onClick={descargarPDF}
+      >
+        DESCARGAR PDF
+      </button>
+
+      <button
+        style={styles.btnMain}
+        onClick={() => window.location.reload()}
+      >
+        FINALIZAR Y SALIR
+      </button>
+
     </div>
   );
 }
